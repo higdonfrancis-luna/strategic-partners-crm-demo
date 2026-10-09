@@ -74,6 +74,14 @@ select:focus{outline:none;border-color:var(--red)}
 .legend-title{font-size:11px;font-weight:500;color:var(--t2);margin-bottom:8px}
 .legend-item{display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:11px;color:var(--t2);font-variant-numeric:tabular-nums}
 .legend-dot{width:10px;height:10px;border-radius:50%}
+.map-style{position:absolute;top:10px;right:10px;z-index:1000;display:flex;align-items:center;padding:3px;gap:2px;background:rgba(10,10,10,0.92);border:1px solid var(--line2);border-radius:var(--r)}
+.map-style button{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;background:transparent;border:none;border-radius:5px;color:var(--t3);font-size:12px;font-weight:500;cursor:pointer;transition:background .15s,color .15s}
+.map-style button:hover{color:#fff}
+.map-style button[aria-pressed="true"]{background:var(--line2);color:#fff}
+.map-style button[aria-pressed="true"] svg{color:var(--red)}
+.map-style svg{width:14px;height:14px}
+.leaflet-tile-pane{transition:filter .4s ease}
+.map-dark .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.9) contrast(.9) saturate(.5)}
 .sidebar{width:360px;background:#0a0a0a;border-left:1px solid var(--line);display:flex;flex-direction:column;overflow:hidden}
 .opportunity-finder{padding:10px;flex-shrink:0;max-height:55%;overflow-y:auto;display:none}
 .opportunity-finder-title{font-size:9px;color:#888;letter-spacing:1px;margin-bottom:8px;text-transform:uppercase}
@@ -566,7 +574,7 @@ button.qv-hero.active svg{color:#fff}
 .leaflet-overlay-pane path.leaflet-interactive:nth-child(3n){animation-delay:.12s}
 .leaflet-overlay-pane path.leaflet-interactive:hover{stroke:#fff;stroke-width:2px}
 .spin{animation:spin 1s linear infinite}
-@media (prefers-reduced-motion:reduce){.guide-slide,.guide-return-floating,.header,.filters,.quick-views,.account-panel,.sidebar,.map-container,.leaflet-overlay-pane path.leaflet-interactive,.filter-pill,.multi-select-dropdown,.city-suggestions,.training-dropdown,.cc-response.active,.cc-message,.cc-modal-overlay.active,.cc-modal,.modal.active,.modal-content,.pi-modal.active,.pi-modal-content,.pf-modal.active,.pf-modal-content,.partner-compose-content,.guide-modal-overlay.active,.guide-modal{animation:none}}
+@media (prefers-reduced-motion:reduce){.guide-slide,.guide-return-floating,.header,.filters,.quick-views,.account-panel,.sidebar,.map-container,.leaflet-overlay-pane path.leaflet-interactive,.filter-pill,.multi-select-dropdown,.city-suggestions,.training-dropdown,.cc-response.active,.cc-message,.cc-modal-overlay.active,.cc-modal,.modal.active,.modal-content,.pi-modal.active,.pi-modal-content,.pf-modal.active,.pf-modal-content,.partner-compose-content,.guide-modal-overlay.active,.guide-modal{animation:none}.leaflet-tile-pane{transition:none}}
 /* ========== PURSUIT BRIEF ========== */
 /* Command Center sidebar button, modal quick button, AI DRAFT tag */
 .cc-suggestion.mk-pursuit{border-color:var(--red-line)}
@@ -742,8 +750,12 @@ button.qv-hero.active svg{color:#fff}
  </div>
  <div class="account-panel-list" id="account-panel-list"></div>
  </div>
- <div class="map-container">
+ <div class="map-container map-dark">
  <div id="map"></div>
+ <div class="map-style" role="group" aria-label="Map style">
+ <button type="button" data-map-style="light" aria-pressed="false" title="Light map"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg><span>Light</span></button>
+ <button type="button" data-map-style="dark" aria-pressed="true" title="Dark map"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg><span>Dark</span></button>
+ </div>
  <div class="snapmap-multi-banner" id="snapmap-multi-banner"></div>
  <div class="snapmap-controls" id="snapmap-controls">
  <div class="snapmap-controls-title"> SNAP MAP</div>
@@ -5595,6 +5607,25 @@ window.addEventListener('keydown', function(e) {
  step(start);
  }).observe(el, { childList: true, characterData: true, subtree: true });
  });
+})();
+</script>
+<script>
+// Map style: light or dark map tiles. Display only; remembers each visitor's choice in their browser.
+(() => {
+ const box = document.querySelector('.map-container');
+ const buttons = document.querySelectorAll('.map-style button');
+ const KEY = 'spcrm-map-style';
+ const apply = style => {
+ box.classList.toggle('map-dark', style === 'dark');
+ buttons.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mapStyle === style)));
+ };
+ let saved = null;
+ try { saved = localStorage.getItem(KEY); } catch (e) {}
+ if (saved === 'light') apply('light');
+ buttons.forEach(b => b.addEventListener('click', () => {
+ apply(b.dataset.mapStyle);
+ try { localStorage.setItem(KEY, b.dataset.mapStyle); } catch (e) {}
+ }));
 })();
 </script>
 </body>
